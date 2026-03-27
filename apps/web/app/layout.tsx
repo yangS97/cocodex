@@ -1,17 +1,6 @@
 import type { Metadata } from "next";
-import { Google_Sans, Roboto_Mono } from "next/font/google";
 
 import "@workspace/ui/globals.css";
-
-const fontSans = Google_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const fontMono = Roboto_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
 
 export const metadata: Metadata = {
   title: "CoCodex",
@@ -28,11 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased`}
-      >
-        {children}
-      </body>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }
