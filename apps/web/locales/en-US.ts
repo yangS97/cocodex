@@ -33,6 +33,7 @@ export const enUS = {
   "page.inbox": "Inbox",
 
   "status.dbNotReady": "Database not ready",
+  "status.failedLoadStatus": "Failed to load status center",
   "status.failedLoadLogs": "Failed to load model response logs",
 
   "login.subtitle": "You need to sign in to continue.",
@@ -46,7 +47,8 @@ export const enUS = {
   "login.error.googleConfig": "Google login is not configured.",
   "login.error.googleState": "Google login session expired. Please try again.",
   "login.error.googleFailed": "Google login failed.",
-  "login.error.googleNotFound": "No portal user is bound to this Google account email.",
+  "login.error.googleNotFound":
+    "No portal user is bound to this Google account email.",
   "login.error.googleUnverified": "This Google account email is not verified.",
   "login.error.googleDisabled": "This user has been disabled.",
   "setup.completeProfileHint":
@@ -56,7 +58,8 @@ export const enUS = {
   "billing.usage": "Usage",
   "billing.addOnsSection": "Add-ons",
   "billing.noAddOns": "No active add-ons",
-  "billing.noAddOnsHint": "Add-on packages provide extra API allowance and advanced features.",
+  "billing.noAddOnsHint":
+    "Add-on packages provide extra API allowance and advanced features.",
   "billing.addOnUsage": "Usage",
   "billing.addOnExpiresAt": "Expires At",
   "billing.addOnExpired": "Expired",
@@ -81,7 +84,8 @@ export const enUS = {
   "team.relogin": "Relogin",
   "team.reloginSuccess": "Relogin completed for {email}.",
   "team.reloginSelectedSuccess": "Relogin completed for {count} accounts.",
-  "team.reloginPartial": "Relogin completed for {success} accounts, failed for {failed}.",
+  "team.reloginPartial":
+    "Relogin completed for {success} accounts, failed for {failed}.",
   "team.joinTeam": "Join Team",
   "team.confirmDisableTitle": "Disable accounts",
   "team.confirmRemoveTitle": "Remove accounts",
@@ -134,6 +138,10 @@ export const enUS = {
   "status.suspended": "Suspend",
   "status.systemFunctions": "System functions",
   "status.modelLatency": "Model latency",
+  "status.accountHealth": "Account health",
+  "status.requestHealth": "Request health",
+  "status.monitorCoverage": "Monitor coverage",
+  "status.priorityIssues": "Priority issues",
   "status.components": "components",
   "status.models": "models",
   "status.latestLatency": "Latest latency",
@@ -148,6 +156,84 @@ export const enUS = {
   "status.noDataPoint": "No data point",
   "status.uptime": "uptime",
   "status.unauthorized": "Unauthorized",
+  "status.healthy": "Healthy",
+  "status.warning": "Warning",
+  "status.degraded": "Degraded",
+  "status.unknown": "Unknown",
+  "status.modeDerived": "Derived signals",
+  "status.modeLive": "Live monitors",
+  "status.modeHybrid": "Live monitors + derived signals",
+  "status.summaryHealthyLive":
+    "Live monitors and recent platform signals look stable.",
+  "status.summaryHealthyDerived":
+    "Recent account and request signals look stable.",
+  "status.summaryWarning":
+    "Some signals need attention, but the workspace still looks usable.",
+  "status.summaryDegraded":
+    "The workspace is showing clear health problems that likely need action.",
+  "status.summaryUnknown":
+    "There is not enough monitor or traffic data to make a strong health call yet.",
+  "status.viewAccounts": "Open accounts",
+  "status.viewLogs": "Open logs",
+  "status.viewFailedLogs": "View failed logs",
+  "status.openSettings": "Open settings",
+  "status.accountHealthHint":
+    "Track how much account capacity is actually available right now.",
+  "status.requestHealthHint":
+    "Recent request quality and throughput are used as live fallback health signals.",
+  "status.monitorCoverageHint":
+    "System and model timelines stay here whenever live monitors are configured.",
+  "status.noMonitorCoverage":
+    "No live monitors are configured, so the page is using derived signals instead.",
+  "status.noRecentRequests": "No recent traffic",
+  "status.noRecentRequestsHint":
+    "Recent request health will appear after fresh traffic arrives.",
+  "status.recentRequests": "Recent requests",
+  "status.successRate": "Success rate",
+  "status.failureRate": "Failure rate",
+  "status.avgLatency": "Avg latency",
+  "status.slowRequests": "Slow requests",
+  "status.activeMonitors": "Active monitors",
+  "status.dataMode": "Data mode",
+  "status.capacityPressure": "Capacity pressure",
+  "status.derivedActive": "Derived only",
+  "status.fallbackTitle": "Derived status is active",
+  "status.fallbackDescription":
+    "No live monitors are configured, so this page is using account and request signals instead.",
+  "status.fallbackSourceAccounts": "Account pool availability",
+  "status.fallbackSourceRequests": "Recent request quality",
+  "status.fallbackSourceUsage": "5-minute throughput and daily usage",
+  "status.noIssues": "No issues need attention right now.",
+  "status.noIssuesHint":
+    "You can still inspect accounts and request logs for more detail.",
+  "status.issueMonitorFailures": "Some live monitors are failing",
+  "status.issueMonitorFailuresHint":
+    "At least one configured monitor is reporting degraded health.",
+  "status.issueNoAccounts": "No accounts are connected yet",
+  "status.issueNoAccountsHint":
+    "This workspace has no connected account capacity to evaluate yet.",
+  "status.issueNoActiveAccounts": "No active accounts are available",
+  "status.issueNoActiveAccountsHint":
+    "Requests may fail until at least one account returns to an active state.",
+  "status.issueAccountPressure": "Account capacity is under pressure",
+  "status.issueAccountPressureHint":
+    "A large share of the current account pool is cooling down or disabled.",
+  "status.issueHighFailureRate": "Recent request failures are elevated",
+  "status.issueHighFailureRateHint":
+    "Failed requests are high enough to affect reliability right now.",
+  "status.issueHighLatency": "Recent request latency is elevated",
+  "status.issueHighLatencyHint":
+    "Requests are completing, but they are taking longer than expected.",
+  "status.issueNoMonitors": "No live monitors are configured",
+  "status.issueNoMonitorsHint":
+    "The page can still infer health from account and request signals, but it is not actively probing the system.",
+  "status.issueMonitorDataUnavailable": "Live monitor data is unavailable",
+  "status.issueMonitorDataUnavailableHint":
+    "The monitor section could not be loaded, so the page is leaning on derived signals only.",
+  "status.issueDerivedDataUnavailable":
+    "Some derived status signals are unavailable",
+  "status.issueDerivedDataUnavailableHint":
+    "Parts of the derived status summary could not be loaded.",
 
   "users.createUser": "Create User",
   "users.usernamePlaceholder": "username",
@@ -240,7 +326,8 @@ export const enUS = {
   "apiKeys.quotaPlaceholder": "e.g. 1000000",
   "apiDocs.title": "API Reference",
   "apiDocs.apiEndpoint": "API Endpoint",
-  "apiDocs.baseUrlMissing": "Not configured (set API_BASE_URL or NEXT_PUBLIC_API_BASE_URL)",
+  "apiDocs.baseUrlMissing":
+    "Not configured (set API_BASE_URL or NEXT_PUBLIC_API_BASE_URL)",
   "apiDocs.responsesExample": "Responses API example",
   "apiDocs.responsesCompactExample": "Responses Compact API example",
   "apiDocs.chatExample": "Chat Completions API example",
@@ -249,8 +336,7 @@ export const enUS = {
   "apiDocs.codexConfigTitle": "Codex Sample Config",
   "models.fastModeHintPrefix":
     "When Fast mode is used, we bill at 2x the standard rate. For Fast mode requests, look for the",
-  "models.fastModeHintSuffix":
-    "marker next to the model in Request Logs.",
+  "models.fastModeHintSuffix": "marker next to the model in Request Logs.",
 
   "logs.requestTime": "Request Time",
   "logs.path": "Path",
@@ -317,7 +403,8 @@ export const enUS = {
   "accounts.submitFailed": "Failed to submit account",
   "accounts.created": "Account submitted",
   "accounts.otpCode": "Verification Code",
-  "accounts.otpRequired": "Email verification is required. Enter the code to continue.",
+  "accounts.otpRequired":
+    "Email verification is required. Enter the code to continue.",
   "accounts.workspaceRequired": "Select a workspace to continue.",
   "accounts.selectWorkspace": "Select a workspace",
   "accounts.completeLogin": "Continue",
@@ -328,7 +415,8 @@ export const enUS = {
   "accounts.autoFillMembersConfirm": "Continue",
   "accounts.autoFillMembersQueued":
     "Queued task to create and invite {count} member accounts.",
-  "accounts.autoFillMembersQueueFailed": "Failed to queue team member fill task",
+  "accounts.autoFillMembersQueueFailed":
+    "Failed to queue team member fill task",
 
   "signup.tasks": "Tasks",
   "signup.count": "Count",
@@ -356,7 +444,8 @@ export const enUS = {
   "settings.clientVersion": "Client Version",
   "settings.inboxTranslationModel": "Inbox Translation Model",
   "settings.cloudMailDomains": "Cloud Mail Domains",
-  "settings.accountSubmissionAddonReward": "Per-account Add-ons Reward (D / W / M)",
+  "settings.accountSubmissionAddonReward":
+    "Per-account Add-ons Reward (D / W / M)",
   "settings.accountSubmissionAddonDailyQuota": "Daily Add-ons Reward",
   "settings.accountSubmissionAddonWeeklyCap": "Weekly Add-ons Reward",
   "settings.accountSubmissionAddonMonthlyCap": "Monthly Add-ons Reward",

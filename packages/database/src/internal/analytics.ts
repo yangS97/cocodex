@@ -1,4 +1,4 @@
-import { query } from "../core/db.ts"
+import { query } from "../core/db.ts";
 import type {
   ApiKeyHourlyStatsSeries,
   ApiKeyModelUsage,
@@ -7,23 +7,24 @@ import type {
   ModelHourlyTokenSeries,
   OpenAIAccountStats,
   PortalUserAccountStats,
+  RecentRequestHealthSummary,
   PortalUserUsageStats,
-} from "./types.ts"
+} from "./types.ts";
 
 export async function getOpenAIAccountStats(): Promise<OpenAIAccountStats> {
   const res = await query<{
-    total: string
-    active: string
-    cooling_down: string
-    disabled: string
-    daily_request_count: string
-    total_request_count: string
-    daily_request_tokens: string
-    total_tokens: string
-    daily_request_cost: string
-    total_cost: string
-    rpm_5m: string
-    tpm_5m: string
+    total: string;
+    active: string;
+    cooling_down: string;
+    disabled: string;
+    daily_request_count: string;
+    total_request_count: string;
+    daily_request_tokens: string;
+    total_tokens: string;
+    daily_request_cost: string;
+    total_cost: string;
+    rpm_5m: string;
+    tpm_5m: string;
   }>(
     `
       WITH account_stats AS (
@@ -82,7 +83,7 @@ export async function getOpenAIAccountStats(): Promise<OpenAIAccountStats> {
       CROSS JOIN log_today
       CROSS JOIN log_5m
     `,
-  )
+  );
   return {
     total: Number(res.rows[0]?.total ?? "0"),
     active: Number(res.rows[0]?.active ?? "0"),
@@ -96,22 +97,22 @@ export async function getOpenAIAccountStats(): Promise<OpenAIAccountStats> {
     totalCost: Number(res.rows[0]?.total_cost ?? "0"),
     rpm5m: Number(res.rows[0]?.rpm_5m ?? "0"),
     tpm5m: Number(res.rows[0]?.tpm_5m ?? "0"),
-  }
+  };
 }
 
 export async function getPortalUserAccountStats(
   userId: string,
 ): Promise<PortalUserAccountStats> {
-  const normalizedUserId = userId.trim()
+  const normalizedUserId = userId.trim();
   if (!normalizedUserId) {
-    return { total: 0, active: 0, coolingDown: 0, disabled: 0 }
+    return { total: 0, active: 0, coolingDown: 0, disabled: 0 };
   }
 
   const res = await query<{
-    total: string
-    active: string
-    cooling_down: string
-    disabled: string
+    total: string;
+    active: string;
+    cooling_down: string;
+    disabled: string;
   }>(
     `
       SELECT
@@ -133,31 +134,31 @@ export async function getPortalUserAccountStats(
         AND portal_user_id = $1::uuid
     `,
     [normalizedUserId],
-  )
+  );
 
   return {
     total: Number(res.rows[0]?.total ?? "0"),
     active: Number(res.rows[0]?.active ?? "0"),
     coolingDown: Number(res.rows[0]?.cooling_down ?? "0"),
     disabled: Number(res.rows[0]?.disabled ?? "0"),
-  }
+  };
 }
 
 export async function getApiKeyUsageStats(
   keyId: string,
 ): Promise<ApiKeyUsageStats> {
   const res = await query<{
-    daily_request_count: string
-    total_request_count: string
-    daily_request_tokens: string
-    total_tokens: string
-    daily_request_cost: string
-    total_cost: string
-    quota: string | null
-    used: string
-    remaining: string | null
-    rpm_5m: string
-    tpm_5m: string
+    daily_request_count: string;
+    total_request_count: string;
+    daily_request_tokens: string;
+    total_tokens: string;
+    daily_request_cost: string;
+    total_cost: string;
+    quota: string | null;
+    used: string;
+    remaining: string | null;
+    rpm_5m: string;
+    tpm_5m: string;
   }>(
     `
       WITH log_totals AS (
@@ -207,7 +208,7 @@ export async function getApiKeyUsageStats(
       WHERE keys.id = $1::uuid
     `,
     [keyId],
-  )
+  );
 
   return {
     dailyRequestCount: Number(res.rows[0]?.daily_request_count ?? "0"),
@@ -225,13 +226,13 @@ export async function getApiKeyUsageStats(
         : Number(res.rows[0]?.remaining ?? "0"),
     rpm5m: Number(res.rows[0]?.rpm_5m ?? "0"),
     tpm5m: Number(res.rows[0]?.tpm_5m ?? "0"),
-  }
+  };
 }
 
 export async function getPortalUserUsageStats(
   ownerUserId: string,
 ): Promise<PortalUserUsageStats> {
-  const ownerId = ownerUserId.trim()
+  const ownerId = ownerUserId.trim();
   if (!ownerId) {
     return {
       dailyRequestCount: 0,
@@ -242,18 +243,18 @@ export async function getPortalUserUsageStats(
       totalCost: 0,
       rpm5m: 0,
       tpm5m: 0,
-    }
+    };
   }
 
   const res = await query<{
-    daily_request_count: string
-    total_request_count: string
-    daily_request_tokens: string
-    total_tokens: string
-    daily_request_cost: string
-    total_cost: string
-    rpm_5m: string
-    tpm_5m: string
+    daily_request_count: string;
+    total_request_count: string;
+    daily_request_tokens: string;
+    total_tokens: string;
+    daily_request_cost: string;
+    total_cost: string;
+    rpm_5m: string;
+    tpm_5m: string;
   }>(
     `
       WITH owner_logs AS (
@@ -298,7 +299,7 @@ export async function getPortalUserUsageStats(
       CROSS JOIN log_5m
     `,
     [ownerId],
-  )
+  );
 
   return {
     dailyRequestCount: Number(res.rows[0]?.daily_request_count ?? "0"),
@@ -309,7 +310,177 @@ export async function getPortalUserUsageStats(
     totalCost: Number(res.rows[0]?.total_cost ?? "0"),
     rpm5m: Number(res.rows[0]?.rpm_5m ?? "0"),
     tpm5m: Number(res.rows[0]?.tpm_5m ?? "0"),
+  };
+}
+
+function normalizeWindowMinutes(windowMinutes: number) {
+  return Number.isFinite(windowMinutes)
+    ? Math.max(1, Math.min(24 * 60, Math.trunc(windowMinutes)))
+    : 15;
+}
+
+function normalizeSlowThresholdMs(slowThresholdMs: number) {
+  return Number.isFinite(slowThresholdMs)
+    ? Math.max(250, Math.min(60_000, Math.trunc(slowThresholdMs)))
+    : 8_000;
+}
+
+function mapRecentRequestHealthSummaryRow(
+  row:
+    | {
+        request_count: string;
+        success_count: string;
+        failed_count: string;
+        slow_count: string;
+        average_latency_ms: string | null;
+        latest_request_at: Date | null;
+      }
+    | undefined,
+): RecentRequestHealthSummary {
+  return {
+    requestCount: Number(row?.request_count ?? "0"),
+    successCount: Number(row?.success_count ?? "0"),
+    failedCount: Number(row?.failed_count ?? "0"),
+    slowCount: Number(row?.slow_count ?? "0"),
+    averageLatencyMs:
+      row?.average_latency_ms == null
+        ? null
+        : Number(row.average_latency_ms ?? "0"),
+    latestRequestAt: row?.latest_request_at?.toISOString() ?? null,
+  };
+}
+
+export async function getRecentRequestHealthSummary(
+  windowMinutes = 15,
+  slowThresholdMs = 8_000,
+): Promise<RecentRequestHealthSummary> {
+  const safeWindowMinutes = normalizeWindowMinutes(windowMinutes);
+  const safeSlowThresholdMs = normalizeSlowThresholdMs(slowThresholdMs);
+
+  const res = await query<{
+    request_count: string;
+    success_count: string;
+    failed_count: string;
+    slow_count: string;
+    average_latency_ms: string | null;
+    latest_request_at: Date | null;
+  }>(
+    `
+      WITH recent_logs AS (
+        SELECT *
+        FROM model_response_logs
+        WHERE request_time >= now() - ($1::int * interval '1 minute')
+      )
+      SELECT
+        COUNT(*)::text AS request_count,
+        COUNT(*) FILTER (
+          WHERE status_code >= 200
+            AND status_code < 300
+            AND is_final = TRUE
+        )::text AS success_count,
+        COUNT(*) FILTER (
+          WHERE (
+            (status_code IS NOT NULL AND (status_code < 200 OR status_code >= 300))
+            OR (
+              status_code >= 200
+              AND status_code < 300
+              AND COALESCE(is_final, FALSE) = FALSE
+              AND (
+                COALESCE(error_code, '') <> ''
+                OR (
+                  COALESCE(stream_end_reason, '') <> ''
+                  AND COALESCE(stream_end_reason, '') NOT LIKE 'client_aborted%'
+                )
+              )
+            )
+          )
+        )::text AS failed_count,
+        COUNT(*) FILTER (
+          WHERE latency_ms IS NOT NULL
+            AND latency_ms >= $2::int
+        )::text AS slow_count,
+        ROUND(AVG(latency_ms))::text AS average_latency_ms,
+        MAX(request_time) AS latest_request_at
+      FROM recent_logs
+    `,
+    [safeWindowMinutes, safeSlowThresholdMs],
+  );
+
+  return mapRecentRequestHealthSummaryRow(res.rows[0]);
+}
+
+export async function getRecentRequestHealthSummaryByOwnerUserId(
+  ownerUserId: string,
+  windowMinutes = 15,
+  slowThresholdMs = 8_000,
+): Promise<RecentRequestHealthSummary> {
+  const ownerId = ownerUserId.trim();
+  if (!ownerId) {
+    return {
+      requestCount: 0,
+      successCount: 0,
+      failedCount: 0,
+      slowCount: 0,
+      averageLatencyMs: null,
+      latestRequestAt: null,
+    };
   }
+
+  const safeWindowMinutes = normalizeWindowMinutes(windowMinutes);
+  const safeSlowThresholdMs = normalizeSlowThresholdMs(slowThresholdMs);
+
+  const res = await query<{
+    request_count: string;
+    success_count: string;
+    failed_count: string;
+    slow_count: string;
+    average_latency_ms: string | null;
+    latest_request_at: Date | null;
+  }>(
+    `
+      WITH recent_logs AS (
+        SELECT logs.*
+        FROM model_response_logs logs
+        JOIN api_keys keys ON keys.id = logs.key_id
+        WHERE keys.owner_user_id = $1::uuid
+          AND logs.request_time >= now() - ($2::int * interval '1 minute')
+      )
+      SELECT
+        COUNT(*)::text AS request_count,
+        COUNT(*) FILTER (
+          WHERE status_code >= 200
+            AND status_code < 300
+            AND is_final = TRUE
+        )::text AS success_count,
+        COUNT(*) FILTER (
+          WHERE (
+            (status_code IS NOT NULL AND (status_code < 200 OR status_code >= 300))
+            OR (
+              status_code >= 200
+              AND status_code < 300
+              AND COALESCE(is_final, FALSE) = FALSE
+              AND (
+                COALESCE(error_code, '') <> ''
+                OR (
+                  COALESCE(stream_end_reason, '') <> ''
+                  AND COALESCE(stream_end_reason, '') NOT LIKE 'client_aborted%'
+                )
+              )
+            )
+          )
+        )::text AS failed_count,
+        COUNT(*) FILTER (
+          WHERE latency_ms IS NOT NULL
+            AND latency_ms >= $3::int
+        )::text AS slow_count,
+        ROUND(AVG(latency_ms))::text AS average_latency_ms,
+        MAX(request_time) AS latest_request_at
+      FROM recent_logs
+    `,
+    [ownerId, safeWindowMinutes, safeSlowThresholdMs],
+  );
+
+  return mapRecentRequestHealthSummaryRow(res.rows[0]);
 }
 
 export async function listApiKeyModelUsage(
@@ -318,14 +489,14 @@ export async function listApiKeyModelUsage(
 ): Promise<ApiKeyModelUsage[]> {
   const safeLimit = Number.isFinite(limit)
     ? Math.max(1, Math.min(500, Math.trunc(limit)))
-    : 100
+    : 100;
 
   const res = await query<{
-    model_id: string
-    request_count: string
-    total_tokens: string
-    total_cost: string
-    last_request_time: Date | null
+    model_id: string;
+    request_count: string;
+    total_tokens: string;
+    total_cost: string;
+    last_request_time: Date | null;
   }>(
     `
       SELECT
@@ -341,7 +512,7 @@ export async function listApiKeyModelUsage(
       LIMIT $2
     `,
     [keyId, safeLimit],
-  )
+  );
 
   return res.rows.map((row) => ({
     modelId: row.model_id || "unknown",
@@ -351,7 +522,7 @@ export async function listApiKeyModelUsage(
     lastRequestTime: row.last_request_time
       ? row.last_request_time.toISOString()
       : null,
-  }))
+  }));
 }
 
 export async function getApiKeyHourlyStatsSeries(
@@ -360,13 +531,13 @@ export async function getApiKeyHourlyStatsSeries(
 ): Promise<ApiKeyHourlyStatsSeries> {
   const safeLookbackHours = Number.isFinite(lookbackHours)
     ? Math.max(1, Math.min(24 * 90, Math.trunc(lookbackHours)))
-    : 24 * 7
+    : 24 * 7;
 
   const res = await query<{
-    hour_bucket: Date
-    requests: string
-    tokens: string
-    cost: string
+    hour_bucket: Date;
+    requests: string;
+    tokens: string;
+    cost: string;
   }>(
     `
       WITH bounds AS (
@@ -403,7 +574,7 @@ export async function getApiKeyHourlyStatsSeries(
       ORDER BY series.hour_bucket ASC
     `,
     [keyId, safeLookbackHours],
-  )
+  );
 
   return {
     points: res.rows.map((row) => ({
@@ -412,7 +583,7 @@ export async function getApiKeyHourlyStatsSeries(
       tokens: Number(row.tokens ?? "0"),
       cost: Number(row.cost ?? "0"),
     })),
-  }
+  };
 }
 
 export async function getApiKeyModelHourlyStatsSeries(
@@ -422,17 +593,17 @@ export async function getApiKeyModelHourlyStatsSeries(
 ): Promise<ModelHourlyStatsSeries> {
   const safeLookbackHours = Number.isFinite(lookbackHours)
     ? Math.max(1, Math.min(24 * 90, Math.trunc(lookbackHours)))
-    : 24 * 30
+    : 24 * 30;
   const safeMaxModels = Number.isFinite(maxModels)
     ? Math.max(1, Math.min(12, Math.trunc(maxModels)))
-    : 6
+    : 6;
 
   const res = await query<{
-    hour_bucket: Date
-    model_id: string
-    tokens: string
-    cost: string
-    requests: string
+    hour_bucket: Date;
+    model_id: string;
+    tokens: string;
+    cost: string;
+    requests: string;
   }>(
     `
       WITH bounds AS (
@@ -489,31 +660,31 @@ export async function getApiKeyModelHourlyStatsSeries(
       ORDER BY hourly_series.hour_bucket ASC, top_models.model_id ASC
     `,
     [keyId, safeLookbackHours, safeMaxModels],
-  )
+  );
 
-  const modelSet = new Set<string>()
+  const modelSet = new Set<string>();
   const pointsMap = new Map<
     string,
     Record<string, { tokens: number; cost: number; requests: number }>
-  >()
+  >();
 
   for (const row of res.rows) {
-    const hour = row.hour_bucket.toISOString()
-    const modelId = row.model_id || "unknown"
-    const tokens = Number(row.tokens ?? "0")
-    const cost = Number(row.cost ?? "0")
-    const requests = Number(row.requests ?? "0")
-    modelSet.add(modelId)
-    const current = pointsMap.get(hour) ?? {}
+    const hour = row.hour_bucket.toISOString();
+    const modelId = row.model_id || "unknown";
+    const tokens = Number(row.tokens ?? "0");
+    const cost = Number(row.cost ?? "0");
+    const requests = Number(row.requests ?? "0");
+    modelSet.add(modelId);
+    const current = pointsMap.get(hour) ?? {};
     current[modelId] = {
       tokens: Number.isFinite(tokens) ? tokens : 0,
       cost: Number.isFinite(cost) ? cost : 0,
       requests: Number.isFinite(requests) ? requests : 0,
-    }
-    pointsMap.set(hour, current)
+    };
+    pointsMap.set(hour, current);
   }
 
-  const models = Array.from(modelSet)
+  const models = Array.from(modelSet);
   const points = Array.from(pointsMap.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([hour, values]) => ({
@@ -521,12 +692,12 @@ export async function getApiKeyModelHourlyStatsSeries(
       values: models.reduce<
         Record<string, { tokens: number; cost: number; requests: number }>
       >((acc, modelId) => {
-        acc[modelId] = values[modelId] ?? { tokens: 0, cost: 0, requests: 0 }
-        return acc
+        acc[modelId] = values[modelId] ?? { tokens: 0, cost: 0, requests: 0 };
+        return acc;
       }, {}),
-    }))
+    }));
 
-  return { models, points }
+  return { models, points };
 }
 
 export async function getModelHourlyTokenSeries(
@@ -535,15 +706,15 @@ export async function getModelHourlyTokenSeries(
 ): Promise<ModelHourlyTokenSeries> {
   const safeLookbackHours = Number.isFinite(lookbackHours)
     ? Math.max(1, Math.min(24 * 90, Math.trunc(lookbackHours)))
-    : 24 * 30
+    : 24 * 30;
   const safeMaxModels = Number.isFinite(maxModels)
     ? Math.max(1, Math.min(12, Math.trunc(maxModels)))
-    : 6
+    : 6;
 
   const res = await query<{
-    hour_bucket: Date
-    model_id: string
-    tokens: string
+    hour_bucket: Date;
+    model_id: string;
+    tokens: string;
   }>(
     `
       WITH bounds AS (
@@ -594,33 +765,33 @@ export async function getModelHourlyTokenSeries(
       ORDER BY hourly_series.hour_bucket ASC, top_models.model_id ASC
     `,
     [safeLookbackHours, safeMaxModels],
-  )
+  );
 
-  const modelSet = new Set<string>()
-  const pointsMap = new Map<string, Record<string, number>>()
+  const modelSet = new Set<string>();
+  const pointsMap = new Map<string, Record<string, number>>();
 
   for (const row of res.rows) {
-    const hour = row.hour_bucket.toISOString()
-    const modelId = row.model_id || "unknown"
-    const tokenCount = Number(row.tokens ?? "0")
-    modelSet.add(modelId)
-    const current = pointsMap.get(hour) ?? {}
-    current[modelId] = Number.isFinite(tokenCount) ? tokenCount : 0
-    pointsMap.set(hour, current)
+    const hour = row.hour_bucket.toISOString();
+    const modelId = row.model_id || "unknown";
+    const tokenCount = Number(row.tokens ?? "0");
+    modelSet.add(modelId);
+    const current = pointsMap.get(hour) ?? {};
+    current[modelId] = Number.isFinite(tokenCount) ? tokenCount : 0;
+    pointsMap.set(hour, current);
   }
 
-  const models = Array.from(modelSet)
+  const models = Array.from(modelSet);
   const points = Array.from(pointsMap.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([hour, values]) => ({
       hour,
       values: models.reduce<Record<string, number>>((acc, modelId) => {
-        acc[modelId] = values[modelId] ?? 0
-        return acc
+        acc[modelId] = values[modelId] ?? 0;
+        return acc;
       }, {}),
-    }))
+    }));
 
-  return { models, points }
+  return { models, points };
 }
 
 export async function getModelHourlyStatsSeries(
@@ -629,17 +800,17 @@ export async function getModelHourlyStatsSeries(
 ): Promise<ModelHourlyStatsSeries> {
   const safeLookbackHours = Number.isFinite(lookbackHours)
     ? Math.max(1, Math.min(24 * 90, Math.trunc(lookbackHours)))
-    : 24 * 30
+    : 24 * 30;
   const safeMaxModels = Number.isFinite(maxModels)
     ? Math.max(1, Math.min(12, Math.trunc(maxModels)))
-    : 6
+    : 6;
 
   const res = await query<{
-    hour_bucket: Date
-    model_id: string
-    tokens: string
-    cost: string
-    requests: string
+    hour_bucket: Date;
+    model_id: string;
+    tokens: string;
+    cost: string;
+    requests: string;
   }>(
     `
       WITH bounds AS (
@@ -694,31 +865,31 @@ export async function getModelHourlyStatsSeries(
       ORDER BY hourly_series.hour_bucket ASC, top_models.model_id ASC
     `,
     [safeLookbackHours, safeMaxModels],
-  )
+  );
 
-  const modelSet = new Set<string>()
+  const modelSet = new Set<string>();
   const pointsMap = new Map<
     string,
     Record<string, { tokens: number; cost: number; requests: number }>
-  >()
+  >();
 
   for (const row of res.rows) {
-    const hour = row.hour_bucket.toISOString()
-    const modelId = row.model_id || "unknown"
-    const tokens = Number(row.tokens ?? "0")
-    const cost = Number(row.cost ?? "0")
-    const requests = Number(row.requests ?? "0")
-    modelSet.add(modelId)
-    const current = pointsMap.get(hour) ?? {}
+    const hour = row.hour_bucket.toISOString();
+    const modelId = row.model_id || "unknown";
+    const tokens = Number(row.tokens ?? "0");
+    const cost = Number(row.cost ?? "0");
+    const requests = Number(row.requests ?? "0");
+    modelSet.add(modelId);
+    const current = pointsMap.get(hour) ?? {};
     current[modelId] = {
       tokens: Number.isFinite(tokens) ? tokens : 0,
       cost: Number.isFinite(cost) ? cost : 0,
       requests: Number.isFinite(requests) ? requests : 0,
-    }
-    pointsMap.set(hour, current)
+    };
+    pointsMap.set(hour, current);
   }
 
-  const models = Array.from(modelSet)
+  const models = Array.from(modelSet);
   const points = Array.from(pointsMap.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([hour, values]) => ({
@@ -726,12 +897,12 @@ export async function getModelHourlyStatsSeries(
       values: models.reduce<
         Record<string, { tokens: number; cost: number; requests: number }>
       >((acc, modelId) => {
-        acc[modelId] = values[modelId] ?? { tokens: 0, cost: 0, requests: 0 }
-        return acc
+        acc[modelId] = values[modelId] ?? { tokens: 0, cost: 0, requests: 0 };
+        return acc;
       }, {}),
-    }))
+    }));
 
-  return { models, points }
+  return { models, points };
 }
 
 export async function getPortalUserModelHourlyStatsSeries(
@@ -739,24 +910,24 @@ export async function getPortalUserModelHourlyStatsSeries(
   lookbackHours = 24 * 30,
   maxModels = 6,
 ): Promise<ModelHourlyStatsSeries> {
-  const ownerId = ownerUserId.trim()
+  const ownerId = ownerUserId.trim();
   if (!ownerId) {
-    return { models: [], points: [] }
+    return { models: [], points: [] };
   }
 
   const safeLookbackHours = Number.isFinite(lookbackHours)
     ? Math.max(1, Math.min(24 * 90, Math.trunc(lookbackHours)))
-    : 24 * 30
+    : 24 * 30;
   const safeMaxModels = Number.isFinite(maxModels)
     ? Math.max(1, Math.min(12, Math.trunc(maxModels)))
-    : 6
+    : 6;
 
   const res = await query<{
-    hour_bucket: Date
-    model_id: string
-    tokens: string
-    cost: string
-    requests: string
+    hour_bucket: Date;
+    model_id: string;
+    tokens: string;
+    cost: string;
+    requests: string;
   }>(
     `
       WITH bounds AS (
@@ -816,31 +987,31 @@ export async function getPortalUserModelHourlyStatsSeries(
       ORDER BY hourly_series.hour_bucket ASC, top_models.model_id ASC
     `,
     [ownerId, safeLookbackHours, safeMaxModels],
-  )
+  );
 
-  const modelSet = new Set<string>()
+  const modelSet = new Set<string>();
   const pointsMap = new Map<
     string,
     Record<string, { tokens: number; cost: number; requests: number }>
-  >()
+  >();
 
   for (const row of res.rows) {
-    const hour = row.hour_bucket.toISOString()
-    const modelId = row.model_id || "unknown"
-    const tokens = Number(row.tokens ?? "0")
-    const cost = Number(row.cost ?? "0")
-    const requests = Number(row.requests ?? "0")
-    modelSet.add(modelId)
-    const current = pointsMap.get(hour) ?? {}
+    const hour = row.hour_bucket.toISOString();
+    const modelId = row.model_id || "unknown";
+    const tokens = Number(row.tokens ?? "0");
+    const cost = Number(row.cost ?? "0");
+    const requests = Number(row.requests ?? "0");
+    modelSet.add(modelId);
+    const current = pointsMap.get(hour) ?? {};
     current[modelId] = {
       tokens: Number.isFinite(tokens) ? tokens : 0,
       cost: Number.isFinite(cost) ? cost : 0,
       requests: Number.isFinite(requests) ? requests : 0,
-    }
-    pointsMap.set(hour, current)
+    };
+    pointsMap.set(hour, current);
   }
 
-  const models = Array.from(modelSet)
+  const models = Array.from(modelSet);
   const points = Array.from(pointsMap.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([hour, values]) => ({
@@ -848,10 +1019,10 @@ export async function getPortalUserModelHourlyStatsSeries(
       values: models.reduce<
         Record<string, { tokens: number; cost: number; requests: number }>
       >((acc, modelId) => {
-        acc[modelId] = values[modelId] ?? { tokens: 0, cost: 0, requests: 0 }
-        return acc
+        acc[modelId] = values[modelId] ?? { tokens: 0, cost: 0, requests: 0 };
+        return acc;
       }, {}),
-    }))
+    }));
 
-  return { models, points }
+  return { models, points };
 }

@@ -33,6 +33,7 @@ export const zhCN = {
   "page.users": "用户管理",
   "page.inbox": "收件箱",
   "status.dbNotReady": "数据库未就绪",
+  "status.failedLoadStatus": "加载状态中心失败",
   "status.failedLoadLogs": "加载模型响应日志失败",
   "login.subtitle": "你需要先登录才能继续。",
   "login.username": "用户名",
@@ -40,7 +41,8 @@ export const zhCN = {
   "login.signIn": "登录",
   "login.continueWithGoogle": "使用 Google 登录",
   "login.error.invalidPassword": "密码错误，请重试。",
-  "login.error.missingEnv": "缺少环境变量：ADMIN_USERNAME / ADMIN_PASSWORD / ADMIN_JWT_SECRET。",
+  "login.error.missingEnv":
+    "缺少环境变量：ADMIN_USERNAME / ADMIN_PASSWORD / ADMIN_JWT_SECRET。",
   "login.error.googleConfig": "Google 登录未配置。",
   "login.error.googleState": "Google 登录会话已失效，请重试。",
   "login.error.googleFailed": "Google 登录失败。",
@@ -126,6 +128,10 @@ export const zhCN = {
   "status.suspended": "已挂起",
   "status.systemFunctions": "系统功能",
   "status.modelLatency": "模型延迟",
+  "status.accountHealth": "账号健康",
+  "status.requestHealth": "请求健康",
+  "status.monitorCoverage": "监测覆盖",
+  "status.priorityIssues": "优先处理项",
   "status.components": "个组件",
   "status.models": "个模型",
   "status.latestLatency": "最近延迟",
@@ -140,6 +146,77 @@ export const zhCN = {
   "status.noDataPoint": "无数据点",
   "status.uptime": "可用率",
   "status.unauthorized": "未授权",
+  "status.healthy": "健康",
+  "status.warning": "告警",
+  "status.degraded": "降级",
+  "status.unknown": "未知",
+  "status.modeDerived": "推导信号",
+  "status.modeLive": "实时监测",
+  "status.modeHybrid": "实时监测 + 推导信号",
+  "status.summaryHealthyLive": "实时监测和近期平台信号整体稳定。",
+  "status.summaryHealthyDerived": "近期账号与请求信号整体稳定。",
+  "status.summaryWarning": "有一些信号需要关注，但当前工作区整体仍可用。",
+  "status.summaryDegraded":
+    "当前工作区已经出现较明确的健康问题，建议尽快处理。",
+  "status.summaryUnknown":
+    "当前缺少足够的监测或流量数据，暂时无法做出明确判断。",
+  "status.viewAccounts": "查看账号",
+  "status.viewLogs": "查看日志",
+  "status.viewFailedLogs": "查看失败日志",
+  "status.openSettings": "打开设置",
+  "status.accountHealthHint": "关注当前真正可用的账号容量是否足够。",
+  "status.requestHealthHint":
+    "近期请求质量和吞吐会作为实时 fallback 健康信号。",
+  "status.monitorCoverageHint":
+    "只要配置了 live monitor，系统和模型时间轴就会继续显示在这里。",
+  "status.noMonitorCoverage":
+    "当前没有 live monitor，页面因此改用推导信号来展示状态。",
+  "status.noRecentRequests": "近期无流量",
+  "status.noRecentRequestsHint":
+    "有新的请求流量后，这里会显示最近请求健康情况。",
+  "status.recentRequests": "最近请求",
+  "status.successRate": "成功率",
+  "status.failureRate": "失败率",
+  "status.avgLatency": "平均延迟",
+  "status.slowRequests": "慢请求占比",
+  "status.activeMonitors": "启用监测项",
+  "status.dataMode": "数据模式",
+  "status.capacityPressure": "容量压力",
+  "status.derivedActive": "仅推导",
+  "status.fallbackTitle": "当前已启用推导状态",
+  "status.fallbackDescription":
+    "由于没有配置 live monitor，这个页面当前会根据账号和请求信号来推导状态。",
+  "status.fallbackSourceAccounts": "账号池可用性",
+  "status.fallbackSourceRequests": "近期请求质量",
+  "status.fallbackSourceUsage": "5 分钟吞吐与当日用量",
+  "status.noIssues": "当前没有需要优先处理的问题。",
+  "status.noIssuesHint":
+    "如果你想看更细节的数据，仍然可以继续查看账号和请求日志。",
+  "status.issueMonitorFailures": "有 live monitor 处于异常状态",
+  "status.issueMonitorFailuresHint":
+    "至少有一个已配置的监测项正在报告降级状态。",
+  "status.issueNoAccounts": "当前还没有接入任何账号",
+  "status.issueNoAccountsHint": "当前工作区还没有可用于评估的账号容量。",
+  "status.issueNoActiveAccounts": "当前没有可用的活跃账号",
+  "status.issueNoActiveAccountsHint":
+    "在至少一个账号恢复活跃之前，请求可能持续失败。",
+  "status.issueAccountPressure": "账号容量处于压力状态",
+  "status.issueAccountPressureHint":
+    "当前账号池中，冷却中或禁用的账号占比已经偏高。",
+  "status.issueHighFailureRate": "近期请求失败率偏高",
+  "status.issueHighFailureRateHint":
+    "当前失败请求占比已经高到会明显影响可用性。",
+  "status.issueHighLatency": "近期请求延迟偏高",
+  "status.issueHighLatencyHint": "请求虽然还能完成，但整体耗时已经明显偏慢。",
+  "status.issueNoMonitors": "当前没有配置 live monitor",
+  "status.issueNoMonitorsHint":
+    "页面仍可基于账号和请求信号推导状态，但它现在不是主动探测模式。",
+  "status.issueMonitorDataUnavailable": "实时监测数据暂时不可用",
+  "status.issueMonitorDataUnavailableHint":
+    "监测区块加载失败，页面当前会更依赖推导信号。",
+  "status.issueDerivedDataUnavailable": "部分推导状态信号暂时不可用",
+  "status.issueDerivedDataUnavailableHint":
+    "推导状态摘要里有部分数据暂时没能加载出来。",
   "users.createUser": "创建用户",
   "users.usernamePlaceholder": "用户名",
   "users.passwordPlaceholder": "密码",
@@ -227,7 +304,8 @@ export const zhCN = {
   "apiKeys.quotaPlaceholder": "例如：1000000",
   "apiDocs.title": "API 接口说明",
   "apiDocs.apiEndpoint": "API 端点",
-  "apiDocs.baseUrlMissing": "未配置（请设置 API_BASE_URL 或 NEXT_PUBLIC_API_BASE_URL）",
+  "apiDocs.baseUrlMissing":
+    "未配置（请设置 API_BASE_URL 或 NEXT_PUBLIC_API_BASE_URL）",
   "apiDocs.responsesExample": "Responses API 示例",
   "apiDocs.responsesCompactExample": "响应紧凑 API 示例",
   "apiDocs.chatExample": "Chat Completions API 示例",
@@ -336,7 +414,8 @@ export const zhCN = {
   "settings.clientVersion": "客户端版本",
   "settings.inboxTranslationModel": "站内信翻译模型",
   "settings.cloudMailDomains": "Cloud Mail 域名",
-  "settings.accountSubmissionAddonReward": "每个账号提交奖励的附加服务（日 / 周 / 月）",
+  "settings.accountSubmissionAddonReward":
+    "每个账号提交奖励的附加服务（日 / 周 / 月）",
   "settings.accountSubmissionAddonDailyQuota": "每日附加服务奖励",
   "settings.accountSubmissionAddonWeeklyCap": "每周附加服务奖励",
   "settings.accountSubmissionAddonMonthlyCap": "每月附加服务奖励",
@@ -351,9 +430,12 @@ export const zhCN = {
   "settings.inputPricePerM": "输入价格（$/百万 Tokens）",
   "settings.cachedInputPricePerM": "缓存输入价格（$/百万 Tokens）",
   "settings.outputPricePerM": "输出价格（$/百万 Tokens）",
-  "settings.inputPricePerMAfter400k": "输入超过 272K 时的输入价格（$/百万 Tokens）",
-  "settings.cachedInputPricePerMAfter400k": "输入超过 272K 时的缓存输入价格（$/百万 Tokens）",
-  "settings.outputPricePerMAfter400k": "输入超过 272K 时的输出价格（$/百万 Tokens）",
+  "settings.inputPricePerMAfter400k":
+    "输入超过 272K 时的输入价格（$/百万 Tokens）",
+  "settings.cachedInputPricePerMAfter400k":
+    "输入超过 272K 时的缓存输入价格（$/百万 Tokens）",
+  "settings.outputPricePerMAfter400k":
+    "输入超过 272K 时的输出价格（$/百万 Tokens）",
   "settings.enabled": "开启",
   "settings.noModelsCached": "暂无缓存模型。",
   "settings.savedSettings": "设置已保存。",

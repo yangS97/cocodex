@@ -5,7 +5,7 @@ export {
   listModelResponseLogsByKeyIdPage,
   listModelResponseLogsPage,
   listModelResponseLogsPageByOwnerUserId,
-} from "../internal/model-logs.ts"
+} from "../internal/model-logs.ts";
 export {
   getApiKeyModelHourlyStatsSeries,
   getApiKeyUsageStats,
@@ -14,13 +14,15 @@ export {
   getOpenAIAccountStats,
   getPortalUserAccountStats,
   getPortalUserModelHourlyStatsSeries,
+  getRecentRequestHealthSummary,
+  getRecentRequestHealthSummaryByOwnerUserId,
   getPortalUserUsageStats,
   listApiKeyModelUsage,
-} from "../internal/analytics.ts"
+} from "../internal/analytics.ts";
 export {
   countPortalAdmins,
   getServiceStatusOverview,
   insertServiceStatusSample,
   listServiceStatusMonitors,
   upsertServiceStatusMonitor,
-} from "../internal/service-status.ts"
+} from "../internal/service-status.ts";

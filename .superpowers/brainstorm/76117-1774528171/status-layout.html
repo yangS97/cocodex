@@ -1,0 +1,72 @@
+<h2>状态中心: 第一屏结构</h2>
+<p class="subtitle">目标是让任何角色点进来都先知道: 现在稳不稳, 问题在哪, 下一步去哪里</p>
+
+<div class="section">
+  <div class="mockup">
+    <div class="mockup-header">Recommended Layout</div>
+    <div class="mockup-body" style="display:grid;gap:16px">
+      <div style="border:2px solid #111827;border-radius:14px;padding:16px;background:#f8fafc">
+        <div class="label">Always visible</div>
+        <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap">
+          <div>
+            <div style="font-size:22px;font-weight:700;margin-bottom:6px">总体状态: Healthy / Warning / Degraded</div>
+            <div style="color:#475569">一句话摘要: 最近 5 分钟请求正常, 但有 2 个账号处于冷却中</div>
+          </div>
+          <div style="display:grid;gap:8px;min-width:220px">
+            <div style="padding:10px 12px;border-radius:10px;background:white;border:1px solid #cbd5e1">RPM / TPM</div>
+            <div style="padding:10px 12px;border-radius:10px;background:white;border:1px solid #cbd5e1">最近错误数 / 可用率</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px">
+        <div style="border:1px solid #cbd5e1;border-radius:14px;padding:14px;background:white">
+          <div class="label">Card 1</div>
+          <div style="font-size:18px;font-weight:700;margin:6px 0 10px">账号健康</div>
+          <div style="display:grid;gap:8px;color:#334155">
+            <div>活跃账号 / 冷却中 / 禁用</div>
+            <div>账号池是否足够</div>
+            <div style="color:#2563eb">入口: 去账号页</div>
+          </div>
+        </div>
+        <div style="border:1px solid #cbd5e1;border-radius:14px;padding:14px;background:white">
+          <div class="label">Card 2</div>
+          <div style="font-size:18px;font-weight:700;margin:6px 0 10px">请求活跃度</div>
+          <div style="display:grid;gap:8px;color:#334155">
+            <div>最近 5 分钟 RPM / TPM</div>
+            <div>今天请求量 / Token</div>
+            <div style="color:#2563eb">入口: 去日志页</div>
+          </div>
+        </div>
+        <div style="border:1px solid #cbd5e1;border-radius:14px;padding:14px;background:white">
+          <div class="label">Card 3</div>
+          <div style="font-size:18px;font-weight:700;margin:6px 0 10px">监测覆盖</div>
+          <div style="display:grid;gap:8px;color:#334155">
+            <div>已配置 monitor 数量</div>
+            <div>无 monitor 时显示 fallback 说明</div>
+            <div style="color:#2563eb">入口: 去设置页</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="split">
+        <div class="mockup">
+          <div class="mockup-header">Priority Issues</div>
+          <div class="mockup-body" style="display:grid;gap:10px">
+            <div style="padding:12px;border-radius:12px;background:#fff7ed;border:1px solid #fdba74">Warning: 冷却中的账号比例偏高</div>
+            <div style="padding:12px;border-radius:12px;background:#eff6ff;border:1px solid #93c5fd">Info: 当前未配置系统监测项, 已切换为推导状态</div>
+            <div style="padding:12px;border-radius:12px;background:#f8fafc;border:1px solid #cbd5e1">Empty: 没有问题时显示“当前没有需要处理的异常”</div>
+          </div>
+        </div>
+        <div class="mockup">
+          <div class="mockup-header">Detailed Panels</div>
+          <div class="mockup-body" style="display:grid;gap:10px">
+            <div style="padding:12px;border-radius:12px;background:#f8fafc;border:1px solid #cbd5e1">系统功能监测: 只有 monitor 存在时出现条形时间轴</div>
+            <div style="padding:12px;border-radius:12px;background:#f8fafc;border:1px solid #cbd5e1">模型延迟监测: 只有 model monitor 存在时出现</div>
+            <div style="padding:12px;border-radius:12px;background:#f8fafc;border:1px solid #cbd5e1">fallback 模式下改为“说明 + 状态来源”</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
