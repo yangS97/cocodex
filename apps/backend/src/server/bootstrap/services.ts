@@ -13,6 +13,9 @@ import { createUpstreamRequestServices } from "../services/openai/upstream-reque
 import { createUpstreamErrorServices } from "../services/openai/upstream-error-services.ts";
 import { createModelRefreshServices } from "../services/openai/model-refresh-services.ts";
 
+// backend 的组合根。
+// 如果你来自 Spring 生态，可以把它理解成一个手写的 @Configuration：
+// 通过显式传参把各个单例服务装配起来，而不是依赖框架容器自动注入。
 export function bootstrapServerServices(deps: any) {
   const apiKeyCache = createApiKeyCacheServices({
     apiKeysCache: deps.apiKeysCache,
@@ -36,7 +39,8 @@ export function bootstrapServerServices(deps: any) {
   const runtime = createOpenAIRuntimeServices({
     isOpenAIModelEnabled: deps.isOpenAIModelEnabled,
     normalizeAccountCacheSize: deps.normalizeAccountCacheSize,
-    normalizeAccountCacheRefreshSeconds: deps.normalizeAccountCacheRefreshSeconds,
+    normalizeAccountCacheRefreshSeconds:
+      deps.normalizeAccountCacheRefreshSeconds,
     normalizeMaxAttemptCount: deps.normalizeMaxAttemptCount,
     normalizeUserRpmLimit: deps.normalizeUserRpmLimit,
     normalizeUserMaxInFlight: deps.normalizeUserMaxInFlight,
@@ -53,7 +57,8 @@ export function bootstrapServerServices(deps: any) {
     requestRateLimitConfig: deps.requestRateLimitConfig,
     userRpmCounters: deps.userRpmCounters,
     userInFlightCounters: deps.userInFlightCounters,
-    markOpenAIAccountsHashSelectionDirty: deps.markOpenAIAccountsHashSelectionDirty,
+    markOpenAIAccountsHashSelectionDirty:
+      deps.markOpenAIAccountsHashSelectionDirty,
     markTeamAccountsHashSelectionDirty: deps.markTeamAccountsHashSelectionDirty,
   });
 
@@ -87,7 +92,8 @@ export function bootstrapServerServices(deps: any) {
     isRecord: deps.isRecord,
     getNestedNumber: getNestedNumberFromRecord,
     ensureDatabaseSchema: deps.ensureDatabaseSchema,
-    recoverExpiredOpenAIAccountCooldowns: deps.recoverExpiredOpenAIAccountCooldowns,
+    recoverExpiredOpenAIAccountCooldowns:
+      deps.recoverExpiredOpenAIAccountCooldowns,
     recoverExpiredTeamAccountCooldowns: deps.recoverExpiredTeamAccountCooldowns,
     listOpenAIAccountsForModelCache: deps.listOpenAIAccountsForModelCache,
     listTeamAccountsForModelCache: deps.listTeamAccountsForModelCache,
@@ -99,12 +105,15 @@ export function bootstrapServerServices(deps: any) {
     openAIAccountsHashSelectionCache: deps.openAIAccountsHashSelectionCache,
     teamAccountsHashSelectionCache: deps.teamAccountsHashSelectionCache,
     temporarilyExcludedSourceAccounts: deps.temporarilyExcludedSourceAccounts,
-    temporarilyExcludedTeamSourceAccounts: deps.temporarilyExcludedTeamSourceAccounts,
+    temporarilyExcludedTeamSourceAccounts:
+      deps.temporarilyExcludedTeamSourceAccounts,
     stickyPromptAccountOverrides: deps.stickyPromptAccountOverrides,
     sourceAccountTransientExcludeMs: deps.SOURCE_ACCOUNT_TRANSIENT_EXCLUDE_MS,
-    stickyPromptAccountOverrideTtlMs: deps.STICKY_PROMPT_ACCOUNT_OVERRIDE_TTL_MS,
+    stickyPromptAccountOverrideTtlMs:
+      deps.STICKY_PROMPT_ACCOUNT_OVERRIDE_TTL_MS,
     stickyPromptAccountOverrideMax: deps.STICKY_PROMPT_ACCOUNT_OVERRIDE_MAX,
-    markOpenAIAccountsHashSelectionDirty: deps.markOpenAIAccountsHashSelectionDirty,
+    markOpenAIAccountsHashSelectionDirty:
+      deps.markOpenAIAccountsHashSelectionDirty,
     markTeamAccountsHashSelectionDirty: deps.markTeamAccountsHashSelectionDirty,
   });
 
@@ -122,7 +131,8 @@ export function bootstrapServerServices(deps: any) {
   });
 
   const model = createModelServices({
-    priceAfter272kInputThresholdTokens: deps.PRICE_AFTER_272K_INPUT_THRESHOLD_TOKENS,
+    priceAfter272kInputThresholdTokens:
+      deps.PRICE_AFTER_272K_INPUT_THRESHOLD_TOKENS,
     openAIModelsCache: deps.openAIModelsCache,
     isOpenAIModelEnabled: deps.isOpenAIModelEnabled,
     ensureOpenAIModelsCacheLoaded: runtime.ensureOpenAIModelsCacheLoaded,
@@ -132,7 +142,8 @@ export function bootstrapServerServices(deps: any) {
     ensureUserBillingAllowanceOrNull: auth.ensureUserBillingAllowanceOrNull,
     consumePortalUserAllowanceQuota: deps.consumePortalUserAllowanceQuota,
     adjustPortalUserBalance: deps.adjustPortalUserBalance,
-    applyUserBillingAllowanceChargeCache: auth.applyUserBillingAllowanceChargeCache,
+    applyUserBillingAllowanceChargeCache:
+      auth.applyUserBillingAllowanceChargeCache,
     applyServiceTierBillingMultiplier: deps.applyServiceTierBillingMultiplier,
   });
 
@@ -142,12 +153,17 @@ export function bootstrapServerServices(deps: any) {
   });
 
   let refreshAccessTokenByRefreshTokenRef:
-    | ((...args: any[]) => Promise<{ accessToken: string; refreshToken?: string | null }>)
+    | ((
+        ...args: any[]
+      ) => Promise<{ accessToken: string; refreshToken?: string | null }>)
     | null = null;
   let resolveRateLimitForAccountRef:
     | ((...args: any[]) => Promise<Record<string, unknown> | null>)
     | null = null;
 
+  // 少数服务之间存在循环依赖。
+  // 例如上游请求处理需要 team token refresh，而 team 流程又依赖上游的 rate-limit 解析。
+  // 这里用 ref 延迟绑定，避免引入完整的 DI 容器。
   const upstreamRequest = createUpstreamRequestServices({
     randomUUID: deps.randomUUID,
     rateLimitRefreshTimeoutMs: deps.RATE_LIMIT_REFRESH_TIMEOUT_MS,
@@ -156,14 +172,17 @@ export function bootstrapServerServices(deps: any) {
     resolveOpenAIUpstreamAccountId: deps.resolveOpenAIUpstreamAccountId,
     refreshAccessTokenByRefreshToken: (...args: any[]) => {
       if (!refreshAccessTokenByRefreshTokenRef) {
-        throw new Error("team refreshAccessTokenByRefreshToken is not initialized");
+        throw new Error(
+          "team refreshAccessTokenByRefreshToken is not initialized",
+        );
       }
       return refreshAccessTokenByRefreshTokenRef(...args);
     },
     updateOpenAIAccountAccessTokenById: deps.updateOpenAIAccountAccessTokenById,
     updateTeamAccountTokensById: deps.updateTeamAccountTokensById,
     disableOpenAIAccountByEmail: deps.disableOpenAIAccountByEmail,
-    markOpenAIAccountsHashSelectionDirty: deps.markOpenAIAccountsHashSelectionDirty,
+    markOpenAIAccountsHashSelectionDirty:
+      deps.markOpenAIAccountsHashSelectionDirty,
     markTeamAccountsHashSelectionDirty: deps.markTeamAccountsHashSelectionDirty,
     openAIAccountsLruCache: deps.openAIAccountsLruCache,
     teamAccountsLruCache: deps.teamAccountsLruCache,
@@ -194,7 +213,9 @@ export function bootstrapServerServices(deps: any) {
     getOpenAIApiRuntimeConfig: runtime.getOpenAIApiRuntimeConfig,
     resolveRateLimitForAccount: (...args: any[]) => {
       if (!resolveRateLimitForAccountRef) {
-        throw new Error("upstream resolveRateLimitForAccount is not initialized");
+        throw new Error(
+          "upstream resolveRateLimitForAccount is not initialized",
+        );
       }
       return resolveRateLimitForAccountRef(...args);
     },
@@ -209,6 +230,7 @@ export function bootstrapServerServices(deps: any) {
   refreshAccessTokenByRefreshTokenRef = team.refreshAccessTokenByRefreshToken;
   resolveRateLimitForAccountRef = upstreamRequest.resolveRateLimitForAccount;
 
+  // 合并后的返回值就是 backend 的“服务注册表”，server.ts 注册各类路由时会直接使用它。
   return {
     ...apiKeyCache,
     ...requestLimits,

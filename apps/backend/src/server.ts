@@ -112,11 +112,7 @@ import {
   registerSignupTaskRoutes,
   summarizeSignupResult,
 } from "./server/signup-tasks/index.ts";
-import {
-  lruGet,
-  lruSet,
-  shuffleInPlace,
-} from "./server/services/index.ts";
+import { lruGet, lruSet, shuffleInPlace } from "./server/services/index.ts";
 import {
   bootstrapServerServices,
   createSelectionCacheMarkers,
@@ -139,6 +135,10 @@ import {
   parseJsonRecordText,
   stripUnsupportedResponsesFields,
 } from "./server/openai-response-utils.ts";
+
+// backend 主入口。
+// 用 Java 的视角看，这个文件把 Spring Boot 启动类、WebMvc/WebSocket 配置、
+// 以及部分 controller 注册职责合并在了一起。
 const DEFAULT_OPENAI_API_USER_AGENT = "node/22.14.0";
 const {
   DEFAULT_OPENAI_API_CLIENT_VERSION,
@@ -188,6 +188,8 @@ const {
 } = createServerRuntimeState({
   normalizeUserMaxInFlight,
 });
+// 这些是当前 backend 进程持有的本地缓存和计数器，
+// 用来支撑限流、上游账号选择等运行时行为。可以把它们看成进程内单例状态。
 const {
   markOpenAIAccountsHashSelectionDirty,
   markTeamAccountsHashSelectionDirty,
@@ -369,6 +371,8 @@ const AUDIO_TRANSCRIPTION_BODY_MAX_BYTES = Number(
 const responsesWebSocketServer = new WsServerCtor({ noServer: true });
 
 app.use(cors());
+// 自定义 JSON 解析层。除了普通 JSON，请求还支持 zstd 压缩的 JSON，
+// 这是为了兼容 OpenAI 风格接口的特定传输场景。
 app.use((req, res, next) => {
   const encodings = parseContentEncodingHeader(req.headers["content-encoding"]);
   const isZstdOnly = encodings.length === 1 && encodings[0] === "zstd";
@@ -430,8 +434,8 @@ app.use((req, res, next) => {
   })().catch((error: unknown) => {
     const status =
       isRecord(error) &&
-        typeof error.status === "number" &&
-        Number.isFinite(error.status)
+      typeof error.status === "number" &&
+      Number.isFinite(error.status)
         ? Math.trunc(error.status)
         : null;
     if (status === 413) {
@@ -454,6 +458,7 @@ app.use((req, res, next) => {
   });
 });
 
+// 给公开 /v1/* 接口的错误响应附加 intent id，方便把用户可见错误和内部日志关联起来。
 app.use((req, res, next) => {
   const originalJson = res.json.bind(res);
   res.json = ((body: unknown) => {
@@ -495,6 +500,8 @@ app.use((req, res, next) => {
   next();
 });
 
+// 管理接口的 Portal 鉴权中间件。
+// 公开的 OpenAI 兼容接口（如 /v1/*）不走这套逻辑，因为它们使用 API key 鉴权。
 app.use(async (req, res, next) => {
   try {
     if (
@@ -550,6 +557,7 @@ app.use(async (req, res, next) => {
   }
 });
 
+// 注册 HTTP 路由分组。可以类比成在服务层装配完成后，统一挂载 controller 模块。
 registerPublicOpenAIRoutes(app, {
   ensureDatabaseSchema,
   authenticateApiKey,
@@ -728,9 +736,6 @@ registerChatRoutes(app, {
   isRetrySafePreTextResponsesEventType,
 });
 
-
-
-
 registerAdminRoutes(app, {
   listOpenAIAccountsPage,
   ensureApiKeysCacheLoaded,
@@ -887,6 +892,9 @@ app.use((error: unknown, _req: Request, res: Response, next: NextFunction) => {
 
 const httpServer = createServer(app);
 
+// WebSocket upgrade 不会经过普通的 Express 路由链，
+// 所以这里直接在原始 HTTP Server 上处理 /v1/responses 的升级请求，
+// 再把 socket 交给代理层。
 httpServer.on("upgrade", (request, socket, head) => {
   const pathname = parseUpgradePathname(request);
   if (pathname !== "/v1/responses") {
@@ -1031,6 +1039,8 @@ httpServer.on("upgrade", (request, socket, head) => {
   });
 });
 
+// 启动阶段会先初始化 schema 和缓存，再对外宣布服务地址。
+// 可以类比成 Java 服务里的 post-construct 预热流程。
 httpServer.listen(port, host, async () => {
   try {
     await ensureDatabaseSchema();

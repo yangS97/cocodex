@@ -3,6 +3,10 @@ import { requireAdminForApi } from "@/lib/auth/api-route-auth";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+// 这是一个很典型的 BFF 路由：
+// 浏览器 -> Next.js API Route -> backend。
+// 它先在本地读取并校验 admin session cookie，再带着 bearer token 转发给 backend，
+// 从而避免浏览器直接暴露 backend 的鉴权模型。
 export async function GET() {
   const authed = await requireAdminForApi();
   if (authed instanceof Response) {
@@ -19,7 +23,8 @@ export async function GET() {
   return new Response(text, {
     status: upstream.status,
     headers: {
-      "Content-Type": upstream.headers.get("content-type") ?? "application/json",
+      "Content-Type":
+        upstream.headers.get("content-type") ?? "application/json",
     },
   });
 }
@@ -45,7 +50,8 @@ export async function PUT(req: Request) {
   return new Response(text, {
     status: upstream.status,
     headers: {
-      "Content-Type": upstream.headers.get("content-type") ?? "application/json",
+      "Content-Type":
+        upstream.headers.get("content-type") ?? "application/json",
     },
   });
 }

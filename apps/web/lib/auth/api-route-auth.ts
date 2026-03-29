@@ -4,6 +4,8 @@ import {
   resolvePortalSessionFromCookieStore,
 } from "@/lib/auth/admin-auth";
 
+// Next API Route 版的鉴权入口，对应 require-admin.ts 里的页面守卫。
+// Next.js 页面路由和 API 路由是两套独立入口，所以都要各自校验 session cookie。
 type AuthenticatedApiSession = {
   token: string;
   session: PortalSessionPayload;
@@ -28,6 +30,7 @@ export async function requireSessionForApi(): Promise<
   return { token: resolved.accessToken, session: resolved.session };
 }
 
+// 大部分管理接口在转发给真正的 backend 之前，都要求调用方已经是 admin。
 export async function requireAdminForApi(): Promise<
   AuthenticatedApiSession | Response
 > {
